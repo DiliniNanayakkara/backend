@@ -10,6 +10,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(
   cors({
@@ -97,7 +98,115 @@ app.post("/login", (req, res) => {
     }
   );
 });
+app.post('/create', (req, res) => {
+  const artworkName = req.body.artworkName;
+  const artworkDescription = req.body.artworkDescription;
+  const artworkUpload = req.body.artworkUpload;
+  const artworkPrice = req.body.artworkPrice;
+  const artworkCategory = req.body.artworkCategory;
+  const artworkQuantity = req.body.artworkQuantity;
 
+  db.query('INSERT INTO artworks (artwork_name, artwork_description, artwork_image, artwork_price, artwork_category, artwork_quantity) VALUES (?,?,?,?,?,?)',
+  [artworkName, artworkDescription, artworkUpload, artworkPrice, artworkCategory, artworkQuantity], 
+  (err, result) => {
+      if (err) {
+          console.log(err);
+      } else{
+          res.send("Values Inserted");
+      }
+  }
+  );
+})
+app.get('/artworks', (req, res) => {
+  db.query("SELECT * FROM artworks", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
+app.get('/products', (req, res) => {
+  db.query("SELECT * FROM art_tool", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
+app.get('/brushes', (req, res) => {
+  db.query("SELECT * FROM art_tool WHERE tool_category = 'Brushes'", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
+app.get('/canvas', (req, res) => {
+  db.query("SELECT * FROM art_tool WHERE tool_category = 'Art Boards & Canvas'", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
+app.get('/supplies', (req, res) => {
+  db.query("SELECT * FROM art_tool WHERE tool_category = 'Painting Supplies'", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
+app.get('/easels', (req, res) => {
+  db.query("SELECT * FROM art_tool WHERE tool_category = 'Easels'", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
+app.get('/drawings', (req, res) => {
+  db.query("SELECT * FROM artworks WHERE artwork_category = 'Drawing'", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
+app.get('/paintings', (req, res) => {
+  db.query("SELECT * FROM artworks WHERE artwork_category = 'Painting'", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
+app.get('/historical', (req, res) => {
+  db.query("SELECT * FROM artworks WHERE artwork_category = 'Historical'", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
+app.get('/fineart', (req, res) => {
+  db.query("SELECT * FROM artworks WHERE artwork_category = 'Fineart'", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result)
+      }
+  })
+})
 app.listen(3001, () => {
   console.log("running server");
 });
