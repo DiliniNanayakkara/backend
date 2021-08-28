@@ -197,6 +197,17 @@ app.get('/artworkdetail/:id', (req, res) => {
   })
 });
 
+app.get('/productdetail/:id', (req, res) => {
+  
+  db.query(`SELECT * FROM tools WHERE tool_id= ${req.params.id} `, (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result);
+      }
+  })
+});
+
 app.get("/products", (req, res) => {
   db.query("SELECT * FROM tools", (err, result) => {
     if (err) {
