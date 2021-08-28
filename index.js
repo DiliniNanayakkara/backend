@@ -185,6 +185,18 @@ app.get("/artworks", (req, res) => {
     }
   });
 });
+
+app.get('/artworkdetail/:id', (req, res) => {
+  
+  db.query(`SELECT * FROM artwork WHERE artwork_id= ${req.params.id} `, (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result);
+      }
+  })
+});
+
 app.get("/products", (req, res) => {
   db.query("SELECT * FROM tools", (err, result) => {
     if (err) {
