@@ -177,7 +177,7 @@ app.post("/create", (req, res) => {
   );
 });
 app.get("/artworks", (req, res) => {
-  db.query("SELECT * FROM artworks", (err, result) => {
+  db.query("SELECT * FROM artwork", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -186,7 +186,7 @@ app.get("/artworks", (req, res) => {
   });
 });
 app.get("/products", (req, res) => {
-  db.query("SELECT * FROM art_tool", (err, result) => {
+  db.query("SELECT * FROM tools", (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -196,7 +196,7 @@ app.get("/products", (req, res) => {
 });
 app.get("/brushes", (req, res) => {
   db.query(
-    "SELECT * FROM art_tool WHERE tool_category = 'Brushes'",
+    "SELECT * FROM tools WHERE tool_category = 'Brushes'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -208,7 +208,7 @@ app.get("/brushes", (req, res) => {
 });
 app.get("/canvas", (req, res) => {
   db.query(
-    "SELECT * FROM art_tool WHERE tool_category = 'Art Boards & Canvas'",
+    "SELECT * FROM tools WHERE tool_category = 'Art Boards & Canvas'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -220,7 +220,7 @@ app.get("/canvas", (req, res) => {
 });
 app.get("/supplies", (req, res) => {
   db.query(
-    "SELECT * FROM art_tool WHERE tool_category = 'Painting Supplies'",
+    "SELECT * FROM tools WHERE tool_category = 'Painting Supplies'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -232,7 +232,7 @@ app.get("/supplies", (req, res) => {
 });
 app.get("/easels", (req, res) => {
   db.query(
-    "SELECT * FROM art_tool WHERE tool_category = 'Easels'",
+    "SELECT * FROM tools WHERE tool_category = 'Easels'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -244,7 +244,7 @@ app.get("/easels", (req, res) => {
 });
 app.get("/drawings", (req, res) => {
   db.query(
-    "SELECT * FROM artworks WHERE artwork_category = 'Drawing'",
+    "SELECT * FROM artwork WHERE artwork_category = 'Drawing'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -256,7 +256,7 @@ app.get("/drawings", (req, res) => {
 });
 app.get("/paintings", (req, res) => {
   db.query(
-    "SELECT * FROM artworks WHERE artwork_category = 'Painting'",
+    "SELECT * FROM artwork WHERE artwork_category = 'Painting'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -268,7 +268,7 @@ app.get("/paintings", (req, res) => {
 });
 app.get("/historical", (req, res) => {
   db.query(
-    "SELECT * FROM artworks WHERE artwork_category = 'Historical'",
+    "SELECT * FROM artwork WHERE artwork_category = 'Historical'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -280,7 +280,7 @@ app.get("/historical", (req, res) => {
 });
 app.get("/fineart", (req, res) => {
   db.query(
-    "SELECT * FROM artworks WHERE artwork_category = 'Fineart'",
+    "SELECT * FROM artwork WHERE artwork_category = 'Fine Art'",
     (err, result) => {
       if (err) {
         console.log(err);
