@@ -8,7 +8,7 @@ const session = require("express-session");
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-
+const path = require('path');
 const app = express();
 
 app.use(cors());
@@ -41,6 +41,56 @@ const db = mysql.createConnection({
   password: "manager",
   database: "loginsystem",
 });
+
+app.use('/public', express.static('public'));
+app.use(bodyParser.urlencoded({extended: true}));
+const multer = require('multer');
+
+const multerConfig = multer.diskStorage({
+  destination: (req,file,callback) => {
+      callback(null, 'public/');
+  },
+  filename: (req, file, callback) => {
+    callback(null, Date.now() + path.extname(file.originalname));
+},
+
+  
+});
+
+const isImage = (req,file,callback) => {
+  if(file.mimetype.startsWith('image')){
+      callback(null, true);
+  }else
+  {
+      callback(new Error('Only images are allowed..'));
+  }
+};
+
+const upload = multer ({
+  storage: multerConfig,
+  fileFilter: isImage,
+});
+
+app.post('/upload', upload.single('photo'), (req, res) => {
+  // console.log(req.file);
+  const imagePath = 'public/' + req.file.filename;
+  // console.log(imagePath);
+  const { artworkName }= req.body;
+  const { artworkDescription }= req.body;
+  const { artworkArtist }= req.body;
+  const { artworkPrice }= req.body;
+  const { artworkCategory }= req.body;
+  // console.log(artworkName);
+  db.query('INSERT INTO artwork (artwork_image, artwork_name, artwork_description, artwork_artist, artwork_price, artwork_category) VALUES (?,?,?,?,?,?)',
+  [imagePath, artworkName, artworkDescription, artworkArtist, artworkPrice, artworkCategory], 
+  (err, result) => {
+  if (err) {
+          console.log(err);
+      } else{
+          res.send("Values Inserted");
+      }
+  })
+})
 
 app.post("/register", (req, res) => {
   const username = req.body.username;
