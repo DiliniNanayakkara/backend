@@ -38,8 +38,8 @@ app.use(
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "manager",
-  database: "loginsystem",
+  password: "",
+  database: "delart",
 });
 
 app.use('/public', express.static('public'));
