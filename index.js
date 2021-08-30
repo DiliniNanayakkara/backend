@@ -113,6 +113,7 @@ app.post("/register", (req, res) => {
   });
 });
 */
+/*
 app.get("/login", (req, res) => {
   if (req.session.user) {
     res.send({ loggedIn: true, user: req.session.user });
@@ -149,6 +150,7 @@ app.post("/login", (req, res) => {
     }
   );
 });
+*/
 app.post("/create", (req, res) => {
   const artworkName = req.body.artworkName;
   const artworkDescription = req.body.artworkDescription;
