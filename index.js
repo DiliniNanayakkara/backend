@@ -70,7 +70,7 @@ const upload = multer ({
   storage: multerConfig,
   fileFilter: isImage,
 });
-
+/*
 app.post('/upload', upload.single('photo'), (req, res) => {
   // console.log(req.file);
   const imagePath = 'public/' + req.file.filename;
@@ -90,7 +90,7 @@ app.post('/upload', upload.single('photo'), (req, res) => {
           res.send("Values Inserted");
       }
   })
-})
+})*/
 
 app.post("/register", (req, res) => {
   const username = req.body.username;
