@@ -91,7 +91,7 @@ app.post('/upload', upload.single('photo'), (req, res) => {
       }
   })
 })
-
+/*
 app.post("/register", (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -112,7 +112,7 @@ app.post("/register", (req, res) => {
     );
   });
 });
-
+*/
 app.get("/login", (req, res) => {
   if (req.session.user) {
     res.send({ loggedIn: true, user: req.session.user });
