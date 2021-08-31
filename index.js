@@ -151,6 +151,50 @@ app.post("/login", (req, res) => {
   );
 });
 */
+
+
+app.post('/register2', (req, res)=>{
+
+  const email = req.body.values.email;
+  const password = req.body.values.password;
+  const nic = req.body.values.nic;
+  const firstname = req.body.values.firstname;
+  const lastname = req.body.values.lastname;
+  const phone = req.body.values.phone;
+  const profile = req.body.values.profile;
+  const location = req.body.values.location;
+  
+  
+  /*email,
+      password,
+      nic,
+      firstName,
+      lastName,
+      phone,
+      //profile,
+      description,
+      location,
+      //userRole,*/ 
+      
+      bcrypt.hash(password, saltRounds, (err, hash) => {
+        if (err) {
+          console.log(err);
+        }
+       db.query("INSERT INTO customer (email, password, nic, first_name, last_name, contact_no, profile, address) VALUES (?,?,?,?,?,?,?,?)", 
+       [email, hash, nic, firstname, lastname, phone, profile, location],
+       (err, result) => {
+        console.log(err);
+      }
+     );
+
+      db.query("INSERT INTO user (email, password,  user_role) VALUES (?,?,'customer')", 
+      [email, hash],
+     (err, result) => {
+      console.log(err);
+     }
+    );
+   });
+});
 app.post("/create", (req, res) => {
   const artworkName = req.body.artworkName;
   const artworkDescription = req.body.artworkDescription;
