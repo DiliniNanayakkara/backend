@@ -8,7 +8,7 @@ const session = require("express-session");
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-const path = require('path');
+const path = require("path");
 const app = express();
 
 app.use(cors());
@@ -42,55 +42,61 @@ const db = mysql.createConnection({
   database: "delart",
 });
 
-app.use('/public', express.static('public'));
-app.use(bodyParser.urlencoded({extended: true}));
-const multer = require('multer');
+app.use("/public", express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }));
+const multer = require("multer");
 
 const multerConfig = multer.diskStorage({
-  destination: (req,file,callback) => {
-      callback(null, 'public/');
+  destination: (req, file, callback) => {
+    callback(null, "public/");
   },
   filename: (req, file, callback) => {
     callback(null, Date.now() + path.extname(file.originalname));
-},
-
-  
+  },
 });
 
-const isImage = (req,file,callback) => {
-  if(file.mimetype.startsWith('image')){
-      callback(null, true);
-  }else
-  {
-      callback(new Error('Only images are allowed..'));
+const isImage = (req, file, callback) => {
+  if (file.mimetype.startsWith("image")) {
+    callback(null, true);
+  } else {
+    callback(new Error("Only images are allowed.."));
   }
 };
 
-const upload = multer ({
+const upload = multer({
   storage: multerConfig,
   fileFilter: isImage,
 });
 
-app.post('/upload', upload.single('photo'), (req, res) => {
+app.post("/upload", upload.single("photo"), (req, res) => {
   // console.log(req.file);
-  const imagePath = 'public/' + req.file.filename;
+  const imagePath = "public/" + req.file.filename;
   // console.log(imagePath);
-  const { artworkName }= req.body;
-  const { artworkDescription }= req.body;
-  const { artworkArtist }= req.body;
-  const { artworkPrice }= req.body;
-  const { artworkCategory }= req.body;
+  const { artworkName } = req.body;
+  const { artworkDescription } = req.body;
+  const { artworkArtist } = req.body;
+  const { artworkPrice } = req.body;
+  const { artworkCategory } = req.body;
   // console.log(artworkName);
-  db.query('INSERT INTO artwork (artwork_image, artwork_name, artwork_description, artwork_artist, artwork_price, artwork_category) VALUES (?,?,?,?,?,?)',
-  [imagePath, artworkName, artworkDescription, artworkArtist, artworkPrice, artworkCategory], 
-  (err, result) => {
-  if (err) {
-          console.log(err);
-      } else{
-          res.send("Values Inserted");
+  db.query(
+    "INSERT INTO artwork (artwork_image, artwork_name, artwork_description, artwork_artist, artwork_price, artwork_category) VALUES (?,?,?,?,?,?)",
+    [
+      imagePath,
+      artworkName,
+      artworkDescription,
+      artworkArtist,
+      artworkPrice,
+      artworkCategory,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("Values Inserted");
       }
-  })
-})
+    }
+  );
+});
 /*
 app.post("/register", (req, res) => {
   const username = req.body.username;
@@ -152,9 +158,56 @@ app.post("/login", (req, res) => {
 });
 */
 
+//***********Artist registration ************/
 
-app.post('/register2', (req, res)=>{
+app.post("/register", (req, res) => {
+  const email = req.body.values.email;
+  const password = req.body.values.password;
+  const nic = req.body.values.nic;
+  const firstName = req.body.values.firstname;
+  const lastName = req.body.values.lastname;
+  const phone = req.body.values.phone;
+  //const profile = req.body.values.profile;
+  const description = req.body.values.description;
+  const location = req.body.values.location;
+  //const userRole = req.body.values.userRole;
 
+  bcrypt.hash(password, saltRounds, (err, hash) => {
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO user (username, user_password) VALUES (?,?)",
+      [email, hash],
+      (err, result) => {
+        console.log("---" + err);
+      }
+    );
+
+    db.query(
+      "INSERT INTO artist (email, password, nic, first_name, last_name, contact_no, description, location) VALUES (?,?,?,?,?,?,?,?)",
+      [
+        email,
+        hash,
+        nic,
+        firstName,
+        lastName,
+        phone,
+        //profile,
+        description,
+        location,
+        //userRole,
+      ],
+      (err, result) => {
+        console.log(err);
+      }
+    );
+  });
+});
+
+//**********Customer registration ************/
+
+app.post("/register2", (req, res) => {
   const email = req.body.values.email;
   const password = req.body.values.password;
   const nic = req.body.values.nic;
@@ -163,8 +216,7 @@ app.post('/register2', (req, res)=>{
   const phone = req.body.values.phone;
   const profile = req.body.values.profile;
   const location = req.body.values.location;
-  
-  
+
   /*email,
       password,
       nic,
@@ -174,30 +226,33 @@ app.post('/register2', (req, res)=>{
       //profile,
       description,
       location,
-      //userRole,*/ 
-      
-      bcrypt.hash(password, saltRounds, (err, hash) => {
-        if (err) {
-          console.log(err);
-        }
-       db.query("INSERT INTO customer (email, password, nic, first_name, last_name, contact_no, profile, address) VALUES (?,?,?,?,?,?,?,?)", 
-       [email, hash, nic, firstname, lastname, phone, profile, location],
-       (err, result) => {
+      //userRole,*/
+
+  bcrypt.hash(password, saltRounds, (err, hash) => {
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO customer (email, password, nic, first_name, last_name, contact_no, profile, address) VALUES (?,?,?,?,?,?,?,?)",
+      [email, hash, nic, firstname, lastname, phone, profile, location],
+      (err, result) => {
         console.log(err);
       }
-     );
-
-      db.query("INSERT INTO user (email, password,  user_role) VALUES (?,?,'customer')", 
-      [email, hash],
-     (err, result) => {
-      console.log(err);
-     }
     );
-   });
+
+    db.query(
+      "INSERT INTO user (email, password,  user_role) VALUES (?,?,'customer')",
+      [email, hash],
+      (err, result) => {
+        console.log(err);
+      }
+    );
+  });
 });
 
-app.post('/register3', (req, res)=>{
+//**********Staff registration ***************/
 
+app.post("/register3", (req, res) => {
   const email = req.body.values.email;
   const password = req.body.values.password;
   const firstname = req.body.values.firstname;
@@ -206,7 +261,7 @@ app.post('/register3', (req, res)=>{
   const profile = req.body.values.profile;
   const role = req.body.values.role;
   const nic = req.body.values.nic;
-  
+
   /*email,
       password,
       nic,
@@ -216,26 +271,28 @@ app.post('/register3', (req, res)=>{
       //profile,
       description,
       location,
-      //userRole,*/ 
-      
-      bcrypt.hash(password, saltRounds, (err, hash) => {
-        if (err) {
-          console.log(err);
-        }
-       db.query("INSERT INTO staff (email, password, first_name, last_name, contact_no, profile, user_role , nic) VALUES (?,?,?,?,?,?,?,?)", 
-       [email, hash, firstname, lastname, phone, profile, role, nic],
-       (err, result) => {
+      //userRole,*/
+
+  bcrypt.hash(password, saltRounds, (err, hash) => {
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO staff (email, password, first_name, last_name, contact_no, profile, user_role , nic) VALUES (?,?,?,?,?,?,?,?)",
+      [email, hash, firstname, lastname, phone, profile, role, nic],
+      (err, result) => {
         console.log(err);
       }
-     );
-
-      db.query("INSERT INTO user (email, password,  user_role) VALUES (?,?,?)", 
-      [email, hash, role],
-     (err, result) => {
-      console.log(err);
-     }
     );
-   });
+
+    db.query(
+      "INSERT INTO user (email, password,  user_role) VALUES (?,?,?)",
+      [email, hash, role],
+      (err, result) => {
+        console.log(err);
+      }
+    );
+  });
 });
 
 app.post("/create", (req, res) => {
@@ -275,26 +332,30 @@ app.get("/artworks", (req, res) => {
   });
 });
 
-app.get('/artworkdetail/:id', (req, res) => {
-  
-  db.query(`SELECT * FROM artwork WHERE artwork_id= ${req.params.id} `, (err, result) => {
-      if(err){
-          console.log(err)
-      }else{
-          res.send(result);
+app.get("/artworkdetail/:id", (req, res) => {
+  db.query(
+    `SELECT * FROM artwork WHERE artwork_id= ${req.params.id} `,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
       }
-  })
+    }
+  );
 });
 
-app.get('/productdetail/:id', (req, res) => {
-  
-  db.query(`SELECT * FROM tools WHERE tool_id= ${req.params.id} `, (err, result) => {
-      if(err){
-          console.log(err)
-      }else{
-          res.send(result);
+app.get("/productdetail/:id", (req, res) => {
+  db.query(
+    `SELECT * FROM tools WHERE tool_id= ${req.params.id} `,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
       }
-  })
+    }
+  );
 });
 
 app.get("/products", (req, res) => {
