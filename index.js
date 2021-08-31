@@ -11,15 +11,15 @@ const saltRounds = 10;
 const path = require("path");
 const app = express();
 
-app.use(cors());
+//app.use(cors());
 app.use(express.json());
-// app.use(
-//   cors({
-//     origin: ["http://localhost:3000"],
-//     methods: ["GET", "POST"],
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: ["http://localhost:3000"],
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -296,6 +296,14 @@ app.post("/register3", (req, res) => {
 });
 
 //******************Login for all the users**************//
+
+app.get("/login", (req, res) => {
+  if (req.session.user) {
+    res.send({ loggedIn: true, user: req.session.user });
+  } else {
+    res.send({ loggedIn: false });
+  }
+});
 
 app.post("/login", (req, res) => {
   const email = req.body.username;
