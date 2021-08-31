@@ -295,6 +295,34 @@ app.post("/register3", (req, res) => {
   });
 });
 
+//******************Login for all the users**************//
+
+app.post("/login", (req, res) => {
+  const email = req.body.username;
+  const password = req.body.password;
+
+  db.query("SELECT * FROM user WHERE email = ?;", email, (err, result) => {
+    if (err) {
+      res.send({ err: err });
+    }
+
+    if (result.length > 0) {
+      bcrypt.compare(password, result[0].user_password, (error, response) => {
+        if (response) {
+          req.session.user = result;
+          console.log(req.session.user);
+          res.send(result);
+          //res.send({ message: "Logged in!" });
+        } else {
+          res.send({ message: "Wrong username/password combination!" });
+        }
+      });
+    } else {
+      res.send({ message: "User doesn't exist" });
+    }
+  });
+});
+
 app.post("/create", (req, res) => {
   const artworkName = req.body.artworkName;
   const artworkDescription = req.body.artworkDescription;
