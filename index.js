@@ -177,7 +177,7 @@ app.post("/register", (req, res) => {
       console.log(err);
     }
     db.query(
-      "INSERT INTO user (username, user_password) VALUES (?,?)",
+      "INSERT INTO user (email, password, user_role) VALUES (?,?,'artist')",
       [email, hash],
       (err, result) => {
         console.log("---" + err);
