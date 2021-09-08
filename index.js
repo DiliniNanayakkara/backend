@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql");
 const cors = require("cors");
@@ -9,6 +10,26 @@ const session = require("express-session");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const path = require("path");
+
+const jwt = require("jsonwebtoken");
+
+const verifyJWT = (req, res, next) => {
+  const token = req.headers["x-access-token"];
+
+  if (!token) {
+    res.send("Need a token. Please give it");
+  } else {
+    jwt.verify(token, process.env.ACCESS_KEY, (err, decoded) => {
+      if (err) {
+        res.json({ auth: false, message: "You failed authentication" });
+      } else {
+        req.userId = decoded.email;
+        next();
+      }
+    });
+  }
+};
+
 const app = express();
 
 //app.use(cors());
@@ -30,7 +51,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      expires: 60 * 60 * 24,
+      expires: 60 * 60 * 24 * 1000,
     },
   })
 );
@@ -309,26 +330,53 @@ app.post("/login", (req, res) => {
   const email = req.body.username;
   const password = req.body.password;
 
-  db.query("SELECT * FROM user WHERE email = ?;", email, (err, result) => {
-    if (err) {
-      res.send({ err: err });
-    }
-
-    if (result.length > 0) {
-      bcrypt.compare(password, result[0].user_password, (error, response) => {
-        if (response) {
-          req.session.user = result;
-          console.log(req.session.user);
-          res.send(result);
-          //res.send({ message: "Logged in!" });
-        } else {
-          res.send({ message: "Wrong username/password combination!" });
+  try {
+    db.query(
+      "SELECT * FROM user WHERE email = '" + email + "'",
+      (err, result) => {
+        if (err) {
+          res.send({ err: err });
         }
-      });
-    } else {
-      res.send({ message: "User doesn't exist" });
-    }
-  });
+
+        if (result.length > 0) {
+          bcrypt.compare(password, result[0].password, (error, response) => {
+            if (response) {
+              const email = result[0].email;
+              const token = jwt.sign({ email }, process.env.ACCESS_KEY);
+
+              req.session.user = result;
+
+              res.json({
+                auth: true,
+                token: token,
+                username: result[0].email,
+                password: result[0].password,
+                role: result[0].user_role,
+              });
+              //console.log(req.session.user);
+
+              //res.send({ message: "Logged in!" });
+            } else {
+              //res.send({ message: "Wrong username/password combination!" });
+              res.json({
+                auth: false,
+                message: "Wrong username/password combination!",
+              });
+            }
+          });
+        } else {
+          //res.send({ message: "User doesn't exist" });
+          res.json({ auth: false, message: "User doesn't exist" });
+        }
+      }
+    );
+  } catch (err) {
+    console.log("Error", err);
+  }
+});
+
+app.get("/isUserAuth", verifyJWT, (req, res) => {
+  res.send("You are authenticated");
 });
 
 app.post("/create", (req, res) => {
