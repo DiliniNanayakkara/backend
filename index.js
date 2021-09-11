@@ -59,8 +59,8 @@ app.use(
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "",
-  database: "delart",
+  password: "manager",
+  database: "new_delart",
 });
 
 app.use("/public", express.static("public"));
@@ -548,10 +548,61 @@ app.get("/fineart", (req, res) => {
   );
 });
 
-app.get("/getOrders", (req, res) => {
+app.post("/getOrders", (req, res) => {
   const artist_id = req.body.artist_id;
   db.query(
     "SELECT * FROM orders WHERE artist_id = '" + artist_id + "'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.post("/approvedOrders", (req, res) => {
+  const buyerId = req.body.buyerId;
+  db.query(
+    "SELECT * FROM orders WHERE artist_approve_status = 1 ",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.post("/statusUpdate", (req, res) => {
+  const order_id = req.body.order_id;
+  db.query(
+    " UPDATE orders SET artist_approve_status = 1 WHERE order_id = '" +
+      order_id +
+      "'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+app.post("/setCart", (req, res) => {
+  const order_id = req.body.orderId;
+  const buyer_id = req.body.buyerId;
+  db.query(
+    "INSERT INTO cart (order_id, buyer_id) VALUES ('" +
+      order_id +
+      "', '" +
+      buyer_id +
+      "')",
     (err, result) => {
       if (err) {
         console.log(err);
