@@ -59,8 +59,8 @@ app.use(
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "manager",
-  database: "new_delart",
+  password: "",
+  database: "delart",
 });
 
 app.use("/public", express.static("public"));
@@ -332,7 +332,9 @@ app.post("/login", (req, res) => {
 
   try {
     db.query(
-      "SELECT * FROM user WHERE email = '" + email + "'",
+      // "SELECT * FROM user WHERE email = '" + email + "'",
+      "SELECT * FROM user WHERE email = ?",
+      email,
       (err, result) => {
         if (err) {
           res.send({ err: err });
@@ -549,9 +551,9 @@ app.get("/fineart", (req, res) => {
 });
 
 app.post("/getOrders", (req, res) => {
-  const artist_id = req.body.artist_id;
+  const username = req.body.username;
   db.query(
-    "SELECT * FROM orders WHERE artist_id = '" + artist_id + "'",
+    "SELECT * FROM orders WHERE username = '" + username + "'",
     (err, result) => {
       if (err) {
         console.log(err);
