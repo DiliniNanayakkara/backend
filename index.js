@@ -551,13 +551,16 @@ app.get("/fineart", (req, res) => {
 });
 /*******************************A R T I S T  P R O F I L E ********************************************************************** */
 app.get("/Artistprofile", (req, res) => {
-  db.query("SELECT artist_Id, email, first_name, last_name, contact_no, location FROM artist WHERE email ='artist@gmail.com'", (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.send(result);
+  db.query(
+    "SELECT artist_Id, email, first_name, last_name, contact_no, location FROM artist WHERE email ='artist@gmail.com'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
     }
-  });
+  );
 });
 /******************************************************************************************************************ARTIST PROFILE */
 app.post("/getOrders", (req, res) => {
@@ -573,7 +576,7 @@ app.post("/getOrders", (req, res) => {
       }
     }
   );
-}); 
+});
 
 app.post("/approvedOrders", (req, res) => {
   const buyerId = req.body.buyerId;
@@ -619,6 +622,19 @@ app.post("/setCart", (req, res) => {
       if (err) {
         console.log(err);
         res.send(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.get("/staff", (req, res) => {
+  db.query(
+    "SELECT email, first_name, last_name, contact_no, user_role, nic FROM staff",
+    (err, result) => {
+      if (err) {
+        console.log(err);
       } else {
         res.send(result);
       }
