@@ -655,6 +655,16 @@ app.get("/Allartist", (req, res) => {
   );
 });
 
+app.get("/ArtistList", (req, res) => {
+  db.query("SELECT count(*) count FROM user", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
 app.listen(5000, () => {
   console.log("Running Server on Port 5000");
 });
