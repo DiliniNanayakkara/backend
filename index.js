@@ -549,6 +549,33 @@ app.get("/fineart", (req, res) => {
     }
   );
 });
+
+/*******************************A R T I S T  P R O F I L E ********************************************************************** */
+app.get("/Artistdis", (req, res) => {
+  db.query(
+    "SELECT first_name, last_name, description FROM artist WHERE email ='artist@gmail.com'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+/******************************************************************************************************************ARTIST PROFILE */
+app.get("/pencilearts", (req, res) => {
+  db.query(
+    "SELECT first_name, last_name, email, contact_no, gig FROM artistgig WHERE email ='artist@gmail.com'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
 /*******************************A R T I S T  P R O F I L E ********************************************************************** */
 app.get("/Artistprofile", (req, res) => {
   db.query(
