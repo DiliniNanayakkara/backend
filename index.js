@@ -444,6 +444,19 @@ app.get("/productdetail/:id", (req, res) => {
   );
 });
 
+app.get("/delivery/:id", (req, res) => {
+  db.query(
+    `SELECT * FROM artwork WHERE artwork_id= ${req.params.id} `,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
 app.get("/products", (req, res) => {
   db.query("SELECT * FROM tools", (err, result) => {
     if (err) {
@@ -545,6 +558,110 @@ app.get("/fineart", (req, res) => {
         console.log(err);
       } else {
         res.send(result);
+      }
+    }
+  );
+});
+
+const dateObj = new Date();
+const month = dateObj.getUTCMonth() + 1; //months from 1-12
+const day = dateObj.getUTCDate();
+const year = dateObj.getUTCFullYear();
+
+newdate = year + "/" + month + "/" + day;
+console.log(newdate);
+
+app.post("/request", (req, res) => {
+  const { artname } = req.body;
+  const { delivery } = req.body;
+  const { price } = req.body;
+  const { artistemail } = req.body;
+  
+  const dateObj = new Date();
+const month = dateObj.getUTCMonth() + 1; //months from 1-12
+const day = dateObj.getUTCDate();
+const year = dateObj.getUTCFullYear();
+
+const newdate = year + "/" + month + "/" + day;
+
+  db.query(
+    "INSERT INTO request (artname, artist, location, price, date) VALUES (?,?,?,?,?)",
+    [
+      artname,
+      artistemail,
+      delivery,
+      price,
+      newdate
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("Values Inserted");
+      }
+    }
+  );
+});
+
+app.get("/artworksearch", (req, res) => {
+  const search = req.body.search;
+  
+  db.query('SELECT * FROM artworks WHERE artwork_artist LIKE "%Sachini%" ', (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  })
+    
+});
+
+app.get("/cart/:id", (req, res) => {
+  
+  db.query(
+    "SELECT * FROM cart WHERE user= '"+ req.params.id +"'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.get('/confirmed', (req, res) => {
+  
+  db.query(`SELECT * FROM request `, (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result);
+      }
+  })
+});
+
+app.post("/addtocart", (req, res) => {
+  const { user } = req.body;
+  const { toolname } = req.body;
+  const { toolcategory } = req.body;
+  const { toolprice } = req.body;
+  const { toolquantity } = req.body;
+  
+  db.query(
+    "INSERT INTO cart (user, cart_tool, cart_category, cart_price, cart_quantity) VALUES (?,?,?,?,?)",
+    [
+      user,
+      toolname,
+      toolcategory,
+      toolprice,
+      toolquantity,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("Added To Cart");
       }
     }
   );
