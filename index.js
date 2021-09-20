@@ -619,3 +619,35 @@ app.post("/setCart", (req, res) => {
 app.listen(5000, () => {
   console.log("Running Server on Port 5000");
 });
+
+//*********************Moderator Function***************//
+app.post("/upload", upload.single("photo"), (req, res) => {
+  // console.log(req.file);
+  const imagePath = "public/" + req.file.filename;
+  // console.log(imagePath);
+  const { toolrkName } = req.body;
+  const { quantity } = req.body;
+  const { ToolPrice } = req.body;
+  const { toolCategory } = req.body;
+  
+  // console.log(artworkName);
+  db.query(
+    "INSERT INTO tools (tool_image, tool_name, tool_quantity, tool_price, tool_category) VALUES (?,?,?,?,?)",
+    [
+      imagePath,
+      toolrkName,
+      quantity,
+      ToolPrice,
+      toolCategory,
+     
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("Values Inserted");
+      }
+    }
+  );
+});
+
