@@ -59,7 +59,7 @@ app.use(
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "",
+  password: "PASSWORD",
   database: "delart",
 });
 
@@ -544,7 +544,9 @@ newdate = year + "/" + month + "/" + day;
 console.log(newdate);
 
 app.post("/request", (req, res) => {
+  const { user } = req.body;
   const { artname } = req.body;
+  const status = 0;
   const { delivery } = req.body;
   const { price } = req.body;
   const { artistemail } = req.body;
@@ -557,11 +559,13 @@ const year = dateObj.getUTCFullYear();
 const newdate = year + "/" + month + "/" + day;
 
   db.query(
-    "INSERT INTO request (artname, artist, location, price, date) VALUES (?,?,?,?,?)",
+    "INSERT INTO request (user, artname, artist, location, status, price, date) VALUES (?,?,?,?,?,?,?)",
     [
+      user,
       artname,
       artistemail,
       delivery,
+      status,
       price,
       newdate
     ],
@@ -573,6 +577,21 @@ const newdate = year + "/" + month + "/" + day;
       }
     }
   );
+});
+
+app.post("/cartremove", (req, res) => {
+  const { cartid } = req.body;
+  db.query(
+    `DELETE FROM cart WHERE cart_id = ${cartid} `,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+  
 });
 
 app.get("/artworksearch", (req, res) => {
@@ -602,9 +621,9 @@ app.get("/cart/:id", (req, res) => {
   );
 });
 
-app.get('/confirmed', (req, res) => {
+app.get('/confirmed/:id', (req, res) => {
   
-  db.query(`SELECT * FROM request `, (err, result) => {
+  db.query("SELECT * FROM request WHERE user= '"+ req.params.id +"' AND status= '1' ", (err, result) => {
       if(err){
           console.log(err)
       }else{
@@ -628,6 +647,31 @@ app.post("/addtocart", (req, res) => {
       toolcategory,
       toolprice,
       toolquantity,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("Added To Cart");
+      }
+    }
+  );
+});
+
+app.post("/addtoorder", (req, res) => {
+  const { user } = req.body;
+  const { carttool } = req.body;
+  const { cartprice } = req.body;
+  const { cartquantity } = req.body;
+  
+  
+  db.query(
+    "INSERT INTO temp_order (user, tool, price, quantity) VALUES (?,?,?,?)",
+    [
+      user,
+      carttool,
+      cartprice,
+      cartquantity,
     ],
     (err, result) => {
       if (err) {
@@ -679,84 +723,115 @@ app.get("/Artistprofile", (req, res) => {
   );
 });
 /******************************************************************************************************************ARTIST PROFILE */
-app.post("/getOrders", (req, res) => {
-  const username = req.body.username;
-  db.query(
-    "SELECT * FROM orders WHERE username = '" + username + "'",
-    (err, result) => {
-      if (err) {
-        console.log(err);
-        res.send(err);
-      } else {
-        res.send(result);
-      }
-    }
-  );
-});
+// app.post("/getOrders", (req, res) => {
+//   const username = req.body.username;
+//   db.query(
+//     "SELECT * FROM orders WHERE username = '" + username + "'",
+//     (err, result) => {
+//       if (err) {
+//         console.log(err);
+//         res.send(err);
+//       } else {
+//         res.send(result);
+//       }
+//     }
+//   );
+// });
 
-app.post("/approvedOrders", (req, res) => {
-  const buyerId = req.body.buyerId;
-  db.query(
-    "SELECT * FROM orders WHERE artist_approve_status = 1 ",
-    (err, result) => {
-      if (err) {
-        console.log(err);
-        res.send(err);
-      } else {
-        res.send(result);
+app.get("/getOrders/:id", (req, res) => {
+    
+    db.query(
+      "SELECT * FROM request WHERE artist = '"+ req.params.id +"'",
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send(err);
+        } else {
+          res.send(result);
+        }
       }
-    }
-  );
-});
+    );
+  });
 
+// app.post("/approvedOrders", (req, res) => {
+//   const buyerId = req.body.buyerId;
+//   db.query(
+//     "SELECT * FROM orders WHERE artist_approve_status = 1 ",
+//     (err, result) => {
+//       if (err) {
+//         console.log(err);
+//         res.send(err);
+//       } else {
+//         res.send(result);
+//       }
+//     }
+//   );
+// });
+
+// app.post("/statusUpdate", (req, res) => {
+//   const order_id = req.body.order_id;
+//   db.query(
+//     " UPDATE orders SET artist_approve_status = 1 WHERE order_id = '" +
+//       order_id +
+//       "'",
+//     (err, result) => {
+//       if (err) {
+//         console.log(err);
+//         res.send(err);
+//       } else {
+//         res.send(result);
+//       }
+//     }
+//   );
+// });
 app.post("/statusUpdate", (req, res) => {
-  const order_id = req.body.order_id;
-  db.query(
-    " UPDATE orders SET artist_approve_status = 1 WHERE order_id = '" +
-      order_id +
-      "'",
-    (err, result) => {
-      if (err) {
-        console.log(err);
-        res.send(err);
-      } else {
-        res.send(result);
+    const request_id = req.body.request_id;
+    db.query(
+      " UPDATE request SET status = 1 WHERE request_id = '" +
+        request_id +
+        "'",
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send(err);
+        } else {
+          res.send(result);
+        }
       }
-    }
-  );
-});
-app.post("/setCart", (req, res) => {
-  const order_id = req.body.orderId;
-  const buyer_id = req.body.buyerId;
-  db.query(
-    "INSERT INTO cart (order_id, buyer_id) VALUES ('" +
-      order_id +
-      "', '" +
-      buyer_id +
-      "')",
-    (err, result) => {
-      if (err) {
-        console.log(err);
-        res.send(err);
-      } else {
-        res.send(result);
-      }
-    }
-  );
-});
+    );
+  });
+// app.post("/setCart", (req, res) => {
+//   const order_id = req.body.orderId;
+//   const buyer_id = req.body.buyerId;
+//   db.query(
+//     "INSERT INTO cart (order_id, buyer_id) VALUES ('" +
+//       order_id +
+//       "', '" +
+//       buyer_id +
+//       "')",
+//     (err, result) => {
+//       if (err) {
+//         console.log(err);
+//         res.send(err);
+//       } else {
+//         res.send(result);
+//       }
+//     }
+//   );
+// });
 
-app.get("/staff", (req, res) => {
-  db.query(
-    "SELECT email, first_name, last_name, contact_no, user_role, nic FROM staff",
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
-      }
-    }
-  );
-});
+// app.get("/staff", (req, res) => {
+//   db.query(
+//     "SELECT email, first_name, last_name, contact_no, user_role, nic FROM staff",
+//     (err, result) => {
+//       if (err) {
+//         console.log(err);
+//       } else {
+//         res.send(result);
+//       }
+//     }
+//   );
+// });
 
 app.get("/Allartist", (req, res) => {
   db.query(
