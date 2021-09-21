@@ -546,7 +546,7 @@ console.log(newdate);
 app.post("/request", (req, res) => {
   const { user } = req.body;
   const { artname } = req.body;
-  const status = 0;
+  const status = "pending";
   const { delivery } = req.body;
   const { price } = req.body;
   const { artistemail } = req.body;
@@ -594,6 +594,7 @@ app.post("/cartremove", (req, res) => {
   
 });
 
+
 app.get("/artworksearch", (req, res) => {
   const search = req.body.search;
   
@@ -621,9 +622,72 @@ app.get("/cart/:id", (req, res) => {
   );
 });
 
+app.get("/order/:id", (req, res) => {
+  
+  db.query(
+    "SELECT * FROM temp_order WHERE user= '"+ req.params.id +"'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+
+app.get("/artworkorder/:id", (req, res) => {
+  
+  db.query(
+    "SELECT * FROM artworkcart WHERE user= '"+ req.params.id +"'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.get("/orderlist/:id", (req, res) => {
+  
+  db.query(
+    "SELECT * FROM temp_order WHERE user= '"+ req.params.id +"'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
 app.get('/confirmed/:id', (req, res) => {
   
-  db.query("SELECT * FROM request WHERE user= '"+ req.params.id +"' AND status= '1' ", (err, result) => {
+  db.query("SELECT * FROM request WHERE user= '"+ req.params.id +"' AND status= 'approved' ", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result);
+      }
+  })
+});
+app.get('/pending/:id', (req, res) => {
+  
+  db.query("SELECT * FROM request WHERE user= '"+ req.params.id +"' AND status= 'pending' ", (err, result) => {
+      if(err){
+          console.log(err)
+      }else{
+          res.send(result);
+      }
+  })
+});
+app.get('/rejected/:id', (req, res) => {
+  
+  db.query("SELECT * FROM request WHERE user= '"+ req.params.id +"' AND status= 'rejected' ", (err, result) => {
       if(err){
           console.log(err)
       }else{
@@ -658,6 +722,30 @@ app.post("/addtocart", (req, res) => {
   );
 });
 
+app.post("/artworkcart", (req, res) => {
+  const { user } = req.body;
+  const { art } = req.body;
+  const { location } = req.body;
+  const { price } = req.body;
+  
+  db.query(
+    "INSERT INTO artworkcart (user, art_name, art_location, art_price) VALUES (?,?,?,?)",
+    [
+      user,
+      art,
+      location,
+      price,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("Added To Cart");
+      }
+    }
+  );
+});
+
 app.post("/addtoorder", (req, res) => {
   const { user } = req.body;
   const { carttool } = req.body;
@@ -681,6 +769,69 @@ app.post("/addtoorder", (req, res) => {
       }
     }
   );
+
+  // db.query(
+  //     `DELETE FROM cart WHERE user = '"${user}"' `,
+  //     (err, result) => {
+  //       if (err) {
+  //         console.log(err);
+  //       } else {
+  //         res.send(result);
+  //       }
+  //     }
+  //   );
+  
+});
+
+app.post("/removefromcart/:id", (req, res) => {
+  const { user } = req.body;
+  db.query(
+    "DELETE FROM cart WHERE user= '"+ req.params.id +"' ",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+  
+});
+
+app.post("/quantityupdate", (req, res) => {
+  const { tool } = req.body;
+  const { quantity } = req.body;
+  
+    db.query(
+      " UPDATE tools SET tool_quantity = '5' WHERE tool_name = '" +
+        tool +
+        "'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+    );
+});
+
+
+app.post("/ordercomplete", (req, res) => {
+  const { user } = req.body;
+  db.query(
+    "DELETE FROM temp_order WHERE user = '"+ user + "' ",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+
+
+  
 });
 
 /*******************************A R T I S T  P R O F I L E ********************************************************************** */
@@ -741,7 +892,7 @@ app.get("/Artistprofile", (req, res) => {
 app.get("/getOrders/:id", (req, res) => {
     
     db.query(
-      "SELECT * FROM request WHERE artist = '"+ req.params.id +"'",
+      "SELECT * FROM request WHERE artist = '"+ req.params.id +"' AND status = 'pending'",
       (err, result) => {
         if (err) {
           console.log(err);
@@ -784,10 +935,62 @@ app.get("/getOrders/:id", (req, res) => {
 //     }
 //   );
 // });
-app.post("/statusUpdate", (req, res) => {
+app.post("/approvestatusUpdate", (req, res) => {
+    const request_id = req.body.request_id;
+
+    db.query(
+      " UPDATE request SET status = 'approved' WHERE request_id = '" +
+        request_id +
+        "'",
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send(err);
+        } else {
+          res.send(result);
+        }
+      }
+    );
+    // const artname = req.body.artname;
+    // const location = req.body.location;
+    // const price = req.body.price;
+    // const requser = req.body.user;
+    // const artist = req.body.artist;
+    // db.query(
+    //   "INSERT INTO approved (request_id, user, artname, artist, location, price) VALUES (?,?,?,?,?,?)",
+    // [
+    //   requestid,
+    //   requser,
+    //   artname,
+    //   artist,
+    //   location,
+    //   price,
+    // ],
+    // (err, result) => {
+    //   if (err) {
+    //     console.log(err);
+    //   } else {
+    //     res.send("Approved");
+    //   }
+    // }
+      // " UPDATE request SET status = 'approved' WHERE request_id = '" +
+      //   request_id +
+      //   "'",
+      // (err, result) => {
+      //   if (err) {
+      //     console.log(err);
+      //     res.send(err);
+      //   } else {
+      //     res.send(result);
+      //   }
+      // }
+    // );
+  });
+
+  app.post("/rejectstatusUpdate", (req, res) => {
     const request_id = req.body.request_id;
     db.query(
-      " UPDATE request SET status = 1 WHERE request_id = '" +
+      " UPDATE request SET status = 'rejected' WHERE request_id = '" +
         request_id +
         "'",
       (err, result) => {
