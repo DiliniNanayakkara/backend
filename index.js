@@ -59,7 +59,7 @@ app.use(
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "PASSWORD",
+  password: "",
   database: "delart",
 });
 
@@ -1978,6 +1978,66 @@ app.post("/sendComplain", (req, res) => {
       console.log(err);
     }
   );
+});
+
+//---------------------Advertisement Uploading--------------------
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/advertisement");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const uploadNew = multer({ storage: storage });
+
+// app.get("/adUpload", (req, res) => {
+//   res.render("upload");
+// });
+
+// app.post("/adUpload", uploadNew.single("image"), (req, res) => {
+//   res.send("Image Uploaded");
+// });
+
+//***************************************//
+app.post("/adUpload", uploadNew.single("image"), (req, res, err) => {
+  if (!req.file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+    res.send({ msg: "Only image files (jpg, jpeg, png) are allowed!" });
+  } else {
+    //const image = req.file.filename;
+    const image = "public/advertisement" + req.file.filename;
+    //const image_path = 'uploads' + req.file.filename;
+    const exhi_date = req.body.exhi_date;
+    const start_date = req.body.start_date;
+    const expiry_date = req.body.expiry_date;
+    // const id = 1;
+
+    //const sqlInsert = "UPDATE images SET 'image' = ? WHERER id = ?;";
+    const sqlInsert =
+      "INSERT INTO advertisement (advertisement, exhi_date, start_date, expiry_date) VALUES (?,?,?,?)";
+    db.query(
+      sqlInsert,
+      [image, exhi_date, start_date, expiry_date],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.send({
+            msg: err,
+          });
+        }
+
+        if (result) {
+          console.log(Date.now());
+          res.send({
+            data: result,
+            msg: "Your Advertisement has been uploaded!",
+          });
+        }
+      }
+    );
+  }
 });
 
 app.listen(5000, () => {
