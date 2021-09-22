@@ -89,7 +89,6 @@ const upload = multer({
   fileFilter: isImage,
 });
 
-
 /*
 app.post("/register", (req, res) => {
   const username = req.body.username;
@@ -550,25 +549,17 @@ app.post("/request", (req, res) => {
   const { delivery } = req.body;
   const { price } = req.body;
   const { artistemail } = req.body;
-  
-  const dateObj = new Date();
-const month = dateObj.getUTCMonth() + 1; //months from 1-12
-const day = dateObj.getUTCDate();
-const year = dateObj.getUTCFullYear();
 
-const newdate = year + "/" + month + "/" + day;
+  const dateObj = new Date();
+  const month = dateObj.getUTCMonth() + 1; //months from 1-12
+  const day = dateObj.getUTCDate();
+  const year = dateObj.getUTCFullYear();
+
+  const newdate = year + "/" + month + "/" + day;
 
   db.query(
     "INSERT INTO request (user, artname, artist, location, status, price, date) VALUES (?,?,?,?,?,?,?)",
-    [
-      user,
-      artname,
-      artistemail,
-      delivery,
-      status,
-      price,
-      newdate
-    ],
+    [user, artname, artistemail, delivery, status, price, newdate],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -581,8 +572,20 @@ const newdate = year + "/" + month + "/" + day;
 
 app.post("/cartremove", (req, res) => {
   const { cartid } = req.body;
+  db.query(`DELETE FROM cart WHERE cart_id = ${cartid} `, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.get("/artworksearch", (req, res) => {
+  const search = req.body.search;
+
   db.query(
-    `DELETE FROM cart WHERE cart_id = ${cartid} `,
+    'SELECT * FROM artworks WHERE artwork_artist LIKE "%Sachini%" ',
     (err, result) => {
       if (err) {
         console.log(err);
@@ -591,27 +594,11 @@ app.post("/cartremove", (req, res) => {
       }
     }
   );
-  
-});
-
-
-app.get("/artworksearch", (req, res) => {
-  const search = req.body.search;
-  
-  db.query('SELECT * FROM artworks WHERE artwork_artist LIKE "%Sachini%" ', (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.send(result);
-    }
-  })
-    
 });
 
 app.get("/cart/:id", (req, res) => {
-  
   db.query(
-    "SELECT * FROM cart WHERE user= '"+ req.params.id +"'",
+    "SELECT * FROM cart WHERE user= '" + req.params.id + "'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -623,9 +610,8 @@ app.get("/cart/:id", (req, res) => {
 });
 
 app.get("/order/:id", (req, res) => {
-  
   db.query(
-    "SELECT * FROM temp_order WHERE user= '"+ req.params.id +"'",
+    "SELECT * FROM temp_order WHERE user= '" + req.params.id + "'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -636,11 +622,9 @@ app.get("/order/:id", (req, res) => {
   );
 });
 
-
 app.get("/artworkorder/:id", (req, res) => {
-  
   db.query(
-    "SELECT * FROM artworkcart WHERE user= '"+ req.params.id +"'",
+    "SELECT * FROM artworkcart WHERE user= '" + req.params.id + "'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -652,9 +636,8 @@ app.get("/artworkorder/:id", (req, res) => {
 });
 
 app.get("/orderlist/:id", (req, res) => {
-  
   db.query(
-    "SELECT * FROM temp_order WHERE user= '"+ req.params.id +"'",
+    "SELECT * FROM temp_order WHERE user= '" + req.params.id + "'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -665,35 +648,47 @@ app.get("/orderlist/:id", (req, res) => {
   );
 });
 
-app.get('/confirmed/:id', (req, res) => {
-  
-  db.query("SELECT * FROM request WHERE user= '"+ req.params.id +"' AND status= 'approved' ", (err, result) => {
-      if(err){
-          console.log(err)
-      }else{
-          res.send(result);
+app.get("/confirmed/:id", (req, res) => {
+  db.query(
+    "SELECT * FROM request WHERE user= '" +
+      req.params.id +
+      "' AND status= 'approved' ",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
       }
-  })
+    }
+  );
 });
-app.get('/pending/:id', (req, res) => {
-  
-  db.query("SELECT * FROM request WHERE user= '"+ req.params.id +"' AND status= 'pending' ", (err, result) => {
-      if(err){
-          console.log(err)
-      }else{
-          res.send(result);
+app.get("/pending/:id", (req, res) => {
+  db.query(
+    "SELECT * FROM request WHERE user= '" +
+      req.params.id +
+      "' AND status= 'pending' ",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
       }
-  })
+    }
+  );
 });
-app.get('/rejected/:id', (req, res) => {
-  
-  db.query("SELECT * FROM request WHERE user= '"+ req.params.id +"' AND status= 'rejected' ", (err, result) => {
-      if(err){
-          console.log(err)
-      }else{
-          res.send(result);
+app.get("/rejected/:id", (req, res) => {
+  db.query(
+    "SELECT * FROM request WHERE user= '" +
+      req.params.id +
+      "' AND status= 'rejected' ",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
       }
-  })
+    }
+  );
 });
 
 app.post("/addtocart", (req, res) => {
@@ -702,16 +697,10 @@ app.post("/addtocart", (req, res) => {
   const { toolcategory } = req.body;
   const { toolprice } = req.body;
   const { toolquantity } = req.body;
-  
+
   db.query(
     "INSERT INTO cart (user, cart_tool, cart_category, cart_price, cart_quantity) VALUES (?,?,?,?,?)",
-    [
-      user,
-      toolname,
-      toolcategory,
-      toolprice,
-      toolquantity,
-    ],
+    [user, toolname, toolcategory, toolprice, toolquantity],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -727,15 +716,10 @@ app.post("/artworkcart", (req, res) => {
   const { art } = req.body;
   const { location } = req.body;
   const { price } = req.body;
-  
+
   db.query(
     "INSERT INTO artworkcart (user, art_name, art_location, art_price) VALUES (?,?,?,?)",
-    [
-      user,
-      art,
-      location,
-      price,
-    ],
+    [user, art, location, price],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -751,16 +735,10 @@ app.post("/addtoorder", (req, res) => {
   const { carttool } = req.body;
   const { cartprice } = req.body;
   const { cartquantity } = req.body;
-  
-  
+
   db.query(
     "INSERT INTO temp_order (user, tool, price, quantity) VALUES (?,?,?,?)",
-    [
-      user,
-      carttool,
-      cartprice,
-      cartquantity,
-    ],
+    [user, carttool, cartprice, cartquantity],
     (err, result) => {
       if (err) {
         console.log(err);
@@ -780,13 +758,12 @@ app.post("/addtoorder", (req, res) => {
   //       }
   //     }
   //   );
-  
 });
 
 app.post("/removefromcart/:id", (req, res) => {
   const { user } = req.body;
   db.query(
-    "DELETE FROM cart WHERE user= '"+ req.params.id +"' ",
+    "DELETE FROM cart WHERE user= '" + req.params.id + "' ",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -795,32 +772,14 @@ app.post("/removefromcart/:id", (req, res) => {
       }
     }
   );
-  
 });
 
 app.post("/quantityupdate", (req, res) => {
   const { tool } = req.body;
   const { quantity } = req.body;
-  
-    db.query(
-      " UPDATE tools SET tool_quantity = '5' WHERE tool_name = '" +
-        tool +
-        "'",
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
-      }
-    }
-    );
-});
 
-
-app.post("/ordercomplete", (req, res) => {
-  const { user } = req.body;
   db.query(
-    "DELETE FROM temp_order WHERE user = '"+ user + "' ",
+    " UPDATE tools SET tool_quantity = '5' WHERE tool_name = '" + tool + "'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -829,9 +788,20 @@ app.post("/ordercomplete", (req, res) => {
       }
     }
   );
+});
 
-
-  
+app.post("/ordercomplete", (req, res) => {
+  const { user } = req.body;
+  db.query(
+    "DELETE FROM temp_order WHERE user = '" + user + "' ",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
 });
 
 /*******************************A R T I S T  P R O F I L E ********************************************************************** */
@@ -890,19 +860,20 @@ app.get("/Artistprofile", (req, res) => {
 // });
 
 app.get("/getOrders/:id", (req, res) => {
-    
-    db.query(
-      "SELECT * FROM request WHERE artist = '"+ req.params.id +"' AND status = 'pending'",
-      (err, result) => {
-        if (err) {
-          console.log(err);
-          res.send(err);
-        } else {
-          res.send(result);
-        }
+  db.query(
+    "SELECT * FROM request WHERE artist = '" +
+      req.params.id +
+      "' AND status = 'pending'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      } else {
+        res.send(result);
       }
-    );
-  });
+    }
+  );
+});
 
 // app.post("/approvedOrders", (req, res) => {
 //   const buyerId = req.body.buyerId;
@@ -936,73 +907,73 @@ app.get("/getOrders/:id", (req, res) => {
 //   );
 // });
 app.post("/approvestatusUpdate", (req, res) => {
-    const request_id = req.body.request_id;
+  const request_id = req.body.request_id;
 
-    db.query(
-      " UPDATE request SET status = 'approved' WHERE request_id = '" +
-        request_id +
-        "'",
-      (err, result) => {
-        if (err) {
-          console.log(err);
-          res.send(err);
-        } else {
-          res.send(result);
-        }
+  db.query(
+    " UPDATE request SET status = 'approved' WHERE request_id = '" +
+      request_id +
+      "'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      } else {
+        res.send(result);
       }
-    );
-    // const artname = req.body.artname;
-    // const location = req.body.location;
-    // const price = req.body.price;
-    // const requser = req.body.user;
-    // const artist = req.body.artist;
-    // db.query(
-    //   "INSERT INTO approved (request_id, user, artname, artist, location, price) VALUES (?,?,?,?,?,?)",
-    // [
-    //   requestid,
-    //   requser,
-    //   artname,
-    //   artist,
-    //   location,
-    //   price,
-    // ],
-    // (err, result) => {
-    //   if (err) {
-    //     console.log(err);
-    //   } else {
-    //     res.send("Approved");
-    //   }
-    // }
-      // " UPDATE request SET status = 'approved' WHERE request_id = '" +
-      //   request_id +
-      //   "'",
-      // (err, result) => {
-      //   if (err) {
-      //     console.log(err);
-      //     res.send(err);
-      //   } else {
-      //     res.send(result);
-      //   }
-      // }
-    // );
-  });
+    }
+  );
+  // const artname = req.body.artname;
+  // const location = req.body.location;
+  // const price = req.body.price;
+  // const requser = req.body.user;
+  // const artist = req.body.artist;
+  // db.query(
+  //   "INSERT INTO approved (request_id, user, artname, artist, location, price) VALUES (?,?,?,?,?,?)",
+  // [
+  //   requestid,
+  //   requser,
+  //   artname,
+  //   artist,
+  //   location,
+  //   price,
+  // ],
+  // (err, result) => {
+  //   if (err) {
+  //     console.log(err);
+  //   } else {
+  //     res.send("Approved");
+  //   }
+  // }
+  // " UPDATE request SET status = 'approved' WHERE request_id = '" +
+  //   request_id +
+  //   "'",
+  // (err, result) => {
+  //   if (err) {
+  //     console.log(err);
+  //     res.send(err);
+  //   } else {
+  //     res.send(result);
+  //   }
+  // }
+  // );
+});
 
-  app.post("/rejectstatusUpdate", (req, res) => {
-    const request_id = req.body.request_id;
-    db.query(
-      " UPDATE request SET status = 'rejected' WHERE request_id = '" +
-        request_id +
-        "'",
-      (err, result) => {
-        if (err) {
-          console.log(err);
-          res.send(err);
-        } else {
-          res.send(result);
-        }
+app.post("/rejectstatusUpdate", (req, res) => {
+  const request_id = req.body.request_id;
+  db.query(
+    " UPDATE request SET status = 'rejected' WHERE request_id = '" +
+      request_id +
+      "'",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.send(err);
+      } else {
+        res.send(result);
       }
-    );
-  });
+    }
+  );
+});
 // app.post("/setCart", (req, res) => {
 //   const order_id = req.body.orderId;
 //   const buyer_id = req.body.buyerId;
@@ -1071,8 +1042,8 @@ app.post("/upload", upload.single("photo"), (req, res) => {
   const { perkmcharge } = req.body;
   const { artworkDimension } = req.body;
   const { artworkArtistEmail } = req.body;
-  
-  if( artistdistrict == "Ampara"){
+
+  if (artistdistrict == "Ampara") {
     db.query(
       "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
       [
@@ -1110,7 +1081,7 @@ app.post("/upload", upload.single("photo"), (req, res) => {
         278,
         50,
         102,
-        214
+        214,
       ],
       (err, result) => {
         if (err) {
@@ -1119,58 +1090,56 @@ app.post("/upload", upload.single("photo"), (req, res) => {
           res.send("Values Inserted");
         }
       }
-    )
-  }
-      else if( artistdistrict == "Anuradhapura"){
-        db.query(
-          "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-          [
-            artworkArtistEmail,
-            imagePath,
-            artworkName,
-            artworkDescription,
-            artworkDimension,
-            artworkArtist,
-            artistdistrict,
-            artworkPrice,
-            perkmcharge,
-            artworkCategory,
-            198,
-            171,
-            257,
-            135,
-            110,
-            220,
-            300,
-            413,
-            332,
-            211,
-            233,
-            164,
-            217,
-            108,
-            73,
-            50,
-            103,
-            186,
-            136,
-            118,
-            131,
-            57,
-            235,
-            182,
-            100
-          ],
-          (err, result) => {
-            if (err) {
-              console.log(err);
-            } else {
-              res.send("Values Inserted");
-            }
-          }
     );
-  }
-   else if( artistdistrict == "Batticaloa"){
+  } else if (artistdistrict == "Anuradhapura") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        198,
+        171,
+        257,
+        135,
+        110,
+        220,
+        300,
+        413,
+        332,
+        211,
+        233,
+        164,
+        217,
+        108,
+        73,
+        50,
+        103,
+        186,
+        136,
+        118,
+        131,
+        57,
+        235,
+        182,
+        100,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Batticaloa") {
     db.query(
       "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
       [
@@ -1208,7 +1177,7 @@ app.post("/upload", upload.single("photo"), (req, res) => {
         210,
         101,
         50,
-        132
+        132,
       ],
       (err, result) => {
         if (err) {
@@ -1217,795 +1186,824 @@ app.post("/upload", upload.single("photo"), (req, res) => {
           res.send("Values Inserted");
         }
       }
-);
-    }
-    else if( artistdistrict == " Badulla"){
-      db.query(
-        "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        [
-          artworkArtistEmail,
-          imagePath,
-          artworkName,
-          artworkDescription,
-          artworkDimension,
-          artworkArtist,
-          artistdistrict,
-          artworkPrice,
-          perkmcharge,
-          artworkCategory,
-          328,
-          337,
-          287,
-          115,
-          137,
-          52,
-          220,
-          129,
-          192,
-          50,
-          58,
-          157,
-          131,
-          155,
-          274,
-          213,
-          148,
-          383,
-          333,
-          315,
-          328,
-          254,
-          145,
-          167,
-          265
-        ],
-        (err, result) => {
-          if (err) {
-            console.log(err);
-          } else {
-            res.send("Values Inserted");
-          }
-        }
-  );
-      }
-      else if( artistdistrict == "Colombo"){
-        db.query(
-          "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-          [
-            artworkArtistEmail,
-            imagePath,
-            artworkName,
-            artworkDescription,
-            artworkDimension,
-            artworkArtist,
-            artistdistrict,
-            artworkPrice,
-            perkmcharge,
-            artworkCategory,
-            30,
-            33,
-            81,
-            122,
-            151,
-            171,
-            125,
-            237,
-            157,
-            328,
-            315,
-            82,
-            93,
-            99,
-            133,
-            200,
-            223,
-            384,
-            334,
-            255,
-            329,
-            255,
-            407,
-            306,
-            275
-          ],
-          (err, result) => {
-            if (err) {
-              console.log(err);
-            } else {
-              res.send("Values Inserted");
-            }
-          }
     );
+  } else if (artistdistrict == " Badulla") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        328,
+        337,
+        287,
+        115,
+        137,
+        52,
+        220,
+        129,
+        192,
+        50,
+        58,
+        157,
+        131,
+        155,
+        274,
+        213,
+        148,
+        383,
+        333,
+        315,
+        328,
+        254,
+        145,
+        167,
+        265,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
         }
-        else if( artistdistrict == "Galle"){
-          db.query(
-            "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            [
-              artworkArtistEmail,
-              imagePath,
-              artworkName,
-              artworkDescription,
-              artworkDimension,
-              artworkArtist,
-              artistdistrict,
-              artworkPrice,
-              perkmcharge,
-              artworkCategory,
-              125,
-              133,
-              83,
-              222,
-              251,
-              253,
-              50,
-              129,
-              52,
-              219,
-              206,
-              183,
-              147,
-              200,
-              253,
-              302,
-              324,
-              486,
-              436,
-              375,
-              431,
-              357,
-              299,
-              354,
-              372
-            ],
-            (err, result) => {
-              if (err) {
-                console.log(err);
-              } else {
-                res.send("Values Inserted");
-              }
-            }
-      );
-          }
-          else if( artistdistrict == "Gampaha"){
-            db.query(
-              "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-              [
-                artworkArtistEmail,
-                imagePath,
-                artworkName,
-                artworkDescription,
-                artworkDimension,
-                artworkArtist,
-                artistdistrict,
-                artworkPrice,
-                perkmcharge,
-                artworkCategory,
-                34,
-                30,
-                90,
-                90,
-                119,
-                139,
-                134,
-                246,
-                166,
-                337,
-                324,
-                50,
-                75,
-                67,
-                125,
-                172,
-                191,
-                356,
-                306,
-                247,
-                301,
-                227,
-                416,
-                270,
-                239
-              ],
-              (err, result) => {
-                if (err) {
-                  console.log(err);
-                } else {
-                  res.send("Values Inserted");
-                }
-              }
-        );
-            }
-            else if( artistdistrict == "Hambantota"){
-              db.query(
-                "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                [
-                  artworkArtistEmail,
-                  imagePath,
-                  artworkName,
-                  artworkDescription,
-                  artworkDimension,
-                  artworkArtist,
-                  artistdistrict,
-                  artworkPrice,
-                  perkmcharge,
-                  artworkCategory,
-                  237,
-                  245,
-                  195,
-                  239,
-                  261,
-                  158,
-                  128,
-                  50,
-                  100,
-                  125,
-                  111,
-                  194,
-                  126,
-                  312,
-                  365,
-                  414,
-                  267,
-                  511,
-                  461,
-                  487,
-                  456,
-                  382,
-                  204,
-                  259,
-                  371
-                ],
-                (err, result) => {
-                  if (err) {
-                    console.log(err);
-                  } else {
-                    res.send("Values Inserted");
-                  }
-                }
-          );
-              }
-              else if( artistdistrict == "Jaffna"){
-                db.query(
-                  "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                  [
-                    artworkArtistEmail,
-                    imagePath,
-                    artworkName,
-                    artworkDescription,
-                    artworkDimension,
-                    artworkArtist,
-                    artistdistrict,
-                    artworkPrice,
-                    perkmcharge,
-                    artworkCategory,
-                    380,
-                    353,
-                    439,
-                    303,
-                    279,
-                    379,
-                    483,
-                    511,
-                    514,
-                    380,
-                    402,
-                    342,
-                    400,
-                    288,
-                    255,
-                    184,
-                    272,
-                    50,
-                    55,
-                    123,
-                    98,
-                    127,
-                    419,
-                    338,
-                    214
-                  ],
-                  (err, result) => {
-                    if (err) {
-                      console.log(err);
-                    } else {
-                      res.send("Values Inserted");
-                    }
-                  }
-            );
-                }
-                else if( artistdistrict == "Kalutara"){
-                  db.query(
-                    "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                    [
-                      artworkArtistEmail,
-                      imagePath,
-                      artworkName,
-                      artworkDescription,
-                      artworkDimension,
-                      artworkArtist,
-                      artistdistrict,
-                      artworkPrice,
-                      perkmcharge,
-                      artworkCategory,
-                      81,
-                      89,
-                      50,
-                      178,
-                      207,
-                      185,
-                      83,
-                      195,
-                      114,
-                      285,
-                      272,
-                      106,
-                      75,
-                      156,
-                      209,
-                      258,
-                      280,
-                      442,
-                      392,
-                      331,
-                      387,
-                      313,
-                      365,
-                      420,
-                      328
-                    ],
-                    (err, result) => {
-                      if (err) {
-                        console.log(err);
-                      } else {
-                        res.send("Values Inserted");
-                      }
-                    }
-              );
-                  }
-                  else if( artistdistrict == "Kandy"){
-                    db.query(
-                      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                      [
-                        artworkArtistEmail,
-                        imagePath,
-                        artworkName,
-                        artworkDescription,
-                        artworkDimension,
-                        artworkArtist,
-                        artistdistrict,
-                        artworkPrice,
-                        perkmcharge,
-                        artworkCategory,
-                        121,
-                        91,
-                        146,
-                        30,
-                        35,
-                        76,
-                        221,
-                        243,
-                        253,
-                        72,
-                        152,
-                        62,
-                        120,
-                        42,
-                        126,
-                        135,
-                        134,
-                        306,
-                        256,
-                        237,
-                        251,
-                        177,
-                        189,
-                        210,
-                        188
-                      ],
-                      (err, result) => {
-                        if (err) {
-                          console.log(err);
-                        } else {
-                          res.send("Values Inserted");
-                        }
-                      }
-                );
-                    }
-                    if( artistdistrict == "Kegalle"){
-                      db.query(
-                        "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                        [
-                          artworkArtistEmail,
-                          imagePath,
-                          artworkName,
-                          artworkDescription,
-                          artworkDimension,
-                          artworkArtist,
-                          artistdistrict,
-                          artworkPrice,
-                          perkmcharge,
-                          artworkCategory,
-                          82,
-                          53,
-                          91,
-                          63,
-                          85,
-                          106,
-                          174,
-                          191,
-                          206,
-                          194,
-                          240,
-                          50,
-                          65,
-                          54,
-                          140,
-                          164,
-                          178,
-                          348,
-                          298,
-                          280,
-                          293,
-                          219,
-                          252,
-                          257,
-                          226
-                        ],
-                        (err, result) => {
-                          if (err) {
-                            console.log(err);
-                          } else {
-                            res.send("Values Inserted");
-                          }
-                        }
-                  );
-                      }
-                      if( artistdistrict == "Kilinochchi"){
-                        db.query(
-                          "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                          [
-                            artworkArtistEmail,
-                            imagePath,
-                            artworkName,
-                            artworkDescription,
-                            artworkDimension,
-                            artworkArtist,
-                            artistdistrict,
-                            artworkPrice,
-                            perkmcharge,
-                            artworkCategory,
-                            332,
-                            305,
-                            391,
-                            256,
-                            231,
-                            331,
-                            435,
-                            463,
-                            466,
-                            332,
-                            354,
-                            294,
-                            351,
-                            240,
-                            207,
-                            136,
-                            224,
-                            57,
-                            50,
-                            124,
-                            62,
-                            79,
-                            371,
-                            290,
-                            166
-                          ],
-                          (err, result) => {
-                            if (err) {
-                              console.log(err);
-                            } else {
-                              res.send("Values Inserted");
-                            }
-                          }
-                    );
-                        }
-                    if( artistdistrict == "Kurunegala"){
-                      db.query(
-                        "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                        [
-                          artworkArtistEmail,
-                          imagePath,
-                          artworkName,
-                          artworkDescription,
-                          artworkDimension,
-                          artworkArtist,
-                          artistdistrict,
-                          artworkPrice,
-                          perkmcharge,
-                          artworkCategory,
-                          99,
-                          69,
-                          156,
-                          42,
-                          52,
-                          112,
-                          200,
-                          312,
-                          231,
-                          155,
-                          193,
-                          54,
-                          112,
-                          40,
-                          85,
-                          109,
-                          124,
-                          290,
-                          240,
-                          222,
-                          235,
-                          161,
-                          242,
-                          203,
-                          172
-                        ],
-                        (err, result) => {
-                          if (err) {
-                            console.log(err);
-                          } else {
-                            res.send("Values Inserted");
-                          }
-                        }
-                  );
-                      }
-                      if( artistdistrict == "Matale"){
-                        db.query(
-                          "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                          [
-                            artworkArtistEmail,
-                            imagePath,
-                            artworkName,
-                            artworkDescription,
-                            artworkDimension,
-                            artworkArtist,
-                            artistdistrict,
-                            artworkPrice,
-                            perkmcharge,
-                            artworkCategory,
-                            154,
-                            120,
-                            206,
-                            35,
-                            30,
-                            99,
-                            250,
-                            300,
-                            281,
-                            137,
-                            191,
-                            85,
-                            143,
-                            50,
-                            135,
-                            111,
-                            110,
-                            281,
-                            231,
-                            213,
-                            227,
-                            152,
-                            215,
-                            189,
-                            163
-                          ],
-                          (err, result) => {
-                            if (err) {
-                              console.log(err);
-                            } else {
-                              res.send("Values Inserted");
-                            }
-                          }
-                    );
-                        }
-                        else if( artistdistrict == "Mannar"){
-                          db.query(
-                            "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                            [
-                              artworkArtistEmail,
-                              imagePath,
-                              artworkName,
-                              artworkDescription,
-                              artworkDimension,
-                              artworkArtist,
-                              artistdistrict,
-                              artworkPrice,
-                              perkmcharge,
-                              artworkCategory,
-                              267,
-                              287,
-                              343,
-                              237,
-                              213,
-                              313,
-                              387,
-                              499,
-                              419,
-                              314,
-                              336,
-                              280,
-                              333,
-                              222,
-                              136,
-                              118,
-                              205,
-                              112,
-                              112,
-                              50,
-                              137,
-                              79,
-                              338,
-                              284,
-                              167
-                            ],
-                            (err, result) => {
-                              if (err) {
-                                console.log(err);
-                              } else {
-                                res.send("Values Inserted");
-                              }
-                            }
-                      );
-                          }
-                          else if( artistdistrict == "Matara"){
-                            db.query(
-                              "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                              [
-                                artworkArtistEmail,
-                                imagePath,
-                                artworkName,
-                                artworkDescription,
-                                artworkDimension,
-                                artworkArtist,
-                                artistdistrict,
-                                artworkPrice,
-                                perkmcharge,
-                                artworkCategory,
-                                153,
-                                162,
-                                112,
-                                251,
-                                280,
-                                222,
-                                44,
-                                98,
-                                40,
-                                188,
-                                175,
-                                211,
-                                175,
-                                228,
-                                281,
-                                331,
-                                331,
-                                515,
-                                465,
-                                403,
-                                460,
-                                386,
-                                268,
-                                323,
-                                400
-                              ],
-                              (err, result) => {
-                                if (err) {
-                                  console.log(err);
-                                } else {
-                                  res.send("Values Inserted");
-                                }
-                              }
-                        );
-                            }
-                            else if( artistdistrict == "Moneragala"){
-                              db.query(
-                                "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                                [
-                                  artworkArtistEmail,
-                                  imagePath,
-                                  artworkName,
-                                  artworkDescription,
-                                  artworkDimension,
-                                  artworkArtist,
-                                  artistdistrict,
-                                  artworkPrice,
-                                  perkmcharge,
-                                  artworkCategory,
-                                  314,
-                                  323,
-                                  273,
-                                  154,
-                                  165,
-                                  116,
-                                  205,
-                                  106,
-                                  177,
-                                  58,
-                                  50,
-                                  216,
-                                  175,
-                                  195,
-                                  297,
-                                  236,
-                                  161,
-                                  406,
-                                  356,
-                                  338,
-                                  351,
-                                  277,
-                                  92,
-                                  154,
-                                  266
-                                ],
-                                (err, result) => {
-                                  if (err) {
-                                    console.log(err);
-                                  } else {
-                                    res.send("Values Inserted");
-                                  }
-                                }
-                          );
-                              }
-                              else if( artistdistrict == "Mullaitivu"){
-                                db.query(
-                                  "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                                  [
-                                    artworkArtistEmail,
-                                    imagePath,
-                                    artworkName,
-                                    artworkDescription,
-                                    artworkDimension,
-                                    artworkArtist,
-                                    artistdistrict,
-                                    artworkPrice,
-                                    perkmcharge,
-                                    artworkCategory,
-                                    328,
-                                    300,
-                                    386,
-                                    251,
-                                    227,
-                                    326,
-                                    430,
-                                    458,
-                                    462,
-                                    327,
-                                    349,
-                                    293,
-                                    346,
-                                    235,
-                                    202,
-                                    131,
-                                    219,
-                                    130,
-                                    80,
-                                    147,
-                                    50,
-                                    74,
-                                    352,
-                                    242,
-                                    161
-                                  ],
-                                  (err, result) => {
-                                    if (err) {
-                                      console.log(err);
-                                    } else {
-                                      res.send("Values Inserted");
-                                    }
-                                  }
-                            );
-                                }
-});
-app.listen(5000, () => {
-  console.log("Running Server on Port 5000");
+      }
+    );
+  } else if (artistdistrict == "Colombo") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        30,
+        33,
+        81,
+        122,
+        151,
+        171,
+        125,
+        237,
+        157,
+        328,
+        315,
+        82,
+        93,
+        99,
+        133,
+        200,
+        223,
+        384,
+        334,
+        255,
+        329,
+        255,
+        407,
+        306,
+        275,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Galle") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        125,
+        133,
+        83,
+        222,
+        251,
+        253,
+        50,
+        129,
+        52,
+        219,
+        206,
+        183,
+        147,
+        200,
+        253,
+        302,
+        324,
+        486,
+        436,
+        375,
+        431,
+        357,
+        299,
+        354,
+        372,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Gampaha") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        34,
+        30,
+        90,
+        90,
+        119,
+        139,
+        134,
+        246,
+        166,
+        337,
+        324,
+        50,
+        75,
+        67,
+        125,
+        172,
+        191,
+        356,
+        306,
+        247,
+        301,
+        227,
+        416,
+        270,
+        239,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Hambantota") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        237,
+        245,
+        195,
+        239,
+        261,
+        158,
+        128,
+        50,
+        100,
+        125,
+        111,
+        194,
+        126,
+        312,
+        365,
+        414,
+        267,
+        511,
+        461,
+        487,
+        456,
+        382,
+        204,
+        259,
+        371,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Jaffna") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        380,
+        353,
+        439,
+        303,
+        279,
+        379,
+        483,
+        511,
+        514,
+        380,
+        402,
+        342,
+        400,
+        288,
+        255,
+        184,
+        272,
+        50,
+        55,
+        123,
+        98,
+        127,
+        419,
+        338,
+        214,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Kalutara") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        81,
+        89,
+        50,
+        178,
+        207,
+        185,
+        83,
+        195,
+        114,
+        285,
+        272,
+        106,
+        75,
+        156,
+        209,
+        258,
+        280,
+        442,
+        392,
+        331,
+        387,
+        313,
+        365,
+        420,
+        328,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Kandy") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        121,
+        91,
+        146,
+        30,
+        35,
+        76,
+        221,
+        243,
+        253,
+        72,
+        152,
+        62,
+        120,
+        42,
+        126,
+        135,
+        134,
+        306,
+        256,
+        237,
+        251,
+        177,
+        189,
+        210,
+        188,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  }
+  if (artistdistrict == "Kegalle") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        82,
+        53,
+        91,
+        63,
+        85,
+        106,
+        174,
+        191,
+        206,
+        194,
+        240,
+        50,
+        65,
+        54,
+        140,
+        164,
+        178,
+        348,
+        298,
+        280,
+        293,
+        219,
+        252,
+        257,
+        226,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  }
+  if (artistdistrict == "Kilinochchi") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        332,
+        305,
+        391,
+        256,
+        231,
+        331,
+        435,
+        463,
+        466,
+        332,
+        354,
+        294,
+        351,
+        240,
+        207,
+        136,
+        224,
+        57,
+        50,
+        124,
+        62,
+        79,
+        371,
+        290,
+        166,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  }
+  if (artistdistrict == "Kurunegala") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        99,
+        69,
+        156,
+        42,
+        52,
+        112,
+        200,
+        312,
+        231,
+        155,
+        193,
+        54,
+        112,
+        40,
+        85,
+        109,
+        124,
+        290,
+        240,
+        222,
+        235,
+        161,
+        242,
+        203,
+        172,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  }
+  if (artistdistrict == "Matale") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        154,
+        120,
+        206,
+        35,
+        30,
+        99,
+        250,
+        300,
+        281,
+        137,
+        191,
+        85,
+        143,
+        50,
+        135,
+        111,
+        110,
+        281,
+        231,
+        213,
+        227,
+        152,
+        215,
+        189,
+        163,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Mannar") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        267,
+        287,
+        343,
+        237,
+        213,
+        313,
+        387,
+        499,
+        419,
+        314,
+        336,
+        280,
+        333,
+        222,
+        136,
+        118,
+        205,
+        112,
+        112,
+        50,
+        137,
+        79,
+        338,
+        284,
+        167,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Matara") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        153,
+        162,
+        112,
+        251,
+        280,
+        222,
+        44,
+        98,
+        40,
+        188,
+        175,
+        211,
+        175,
+        228,
+        281,
+        331,
+        331,
+        515,
+        465,
+        403,
+        460,
+        386,
+        268,
+        323,
+        400,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Moneragala") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        314,
+        323,
+        273,
+        154,
+        165,
+        116,
+        205,
+        106,
+        177,
+        58,
+        50,
+        216,
+        175,
+        195,
+        297,
+        236,
+        161,
+        406,
+        356,
+        338,
+        351,
+        277,
+        92,
+        154,
+        266,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  } else if (artistdistrict == "Mullaitivu") {
+    db.query(
+      "INSERT INTO artwork (artist_email, artwork_image, artwork_name, artwork_description, artwork_dimension, artwork_artist, artist_province, artwork_price, perkm, artwork_category, Colombo, Gampaha, Kalutara, Kandy, Matale, NuwaraEliya, Galle, Hambantota, Matara, Badulla, Moneragala, Kegalle, Rathnapura, Kurunegala, Puttalam, Anuradhapura, Polonnaruwa, Jaffna, Kilinochchi, Mannar, Mullaitivu, Vavuniya, Ampara, Batticaloa, Trincomalee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      [
+        artworkArtistEmail,
+        imagePath,
+        artworkName,
+        artworkDescription,
+        artworkDimension,
+        artworkArtist,
+        artistdistrict,
+        artworkPrice,
+        perkmcharge,
+        artworkCategory,
+        328,
+        300,
+        386,
+        251,
+        227,
+        326,
+        430,
+        458,
+        462,
+        327,
+        349,
+        293,
+        346,
+        235,
+        202,
+        131,
+        219,
+        130,
+        80,
+        147,
+        50,
+        74,
+        352,
+        242,
+        161,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Values Inserted");
+        }
+      }
+    );
+  }
 });
 
 //*********************Moderator Function***************//
+app.post("/sendComplain", (req, res) => {
+  const email = req.body.values.email;
+  const firstname = req.body.values.firstname;
+  const lastname = req.body.values.lastname;
+  const phone = req.body.values.phone;
+  const role = req.body.values.role;
+  const complain = req.body.values.complain;
+
+  /*email,
+      password,
+      nic,
+      firstName,
+      lastName,
+      phone,
+      //profile,
+      description,
+      location,
+      //userRole,*/
+
+  bcrypt.hash(password, saltRounds, (err, hash) => {
+    if (err) {
+      console.log(err);
+    }
+    db.query(
+      "INSERT INTO staff (email, password, first_name, last_name, contact_no, profile, user_role , nic) VALUES (?,?,?,?,?,?,?,?)",
+      [email, hash, firstname, lastname, phone, profile, role, nic],
+      (err, result) => {
+        console.log(err);
+      }
+    );
+
+    db.query(
+      "INSERT INTO user (email, password,  user_role) VALUES (?,?,?)",
+      [email, hash, role],
+      (err, result) => {
+        console.log(err);
+      }
+    );
+  });
+});
+
+app.listen(5000, () => {
+  console.log("Running Server on Port 5000");
+});
