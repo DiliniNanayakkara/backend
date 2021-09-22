@@ -1971,37 +1971,13 @@ app.post("/sendComplain", (req, res) => {
   const role = req.body.values.role;
   const complain = req.body.values.complain;
 
-  /*email,
-      password,
-      nic,
-      firstName,
-      lastName,
-      phone,
-      //profile,
-      description,
-      location,
-      //userRole,*/
-
-  bcrypt.hash(password, saltRounds, (err, hash) => {
-    if (err) {
+  db.query(
+    "INSERT INTO complain (email, first_name, last_name, contact_no,  user_role , complain) VALUES (?,?,?,?,?,?,?,?)",
+    [email, firstname, lastname, phone, role, complain],
+    (err, result) => {
       console.log(err);
     }
-    db.query(
-      "INSERT INTO staff (email, password, first_name, last_name, contact_no, profile, user_role , nic) VALUES (?,?,?,?,?,?,?,?)",
-      [email, hash, firstname, lastname, phone, profile, role, nic],
-      (err, result) => {
-        console.log(err);
-      }
-    );
-
-    db.query(
-      "INSERT INTO user (email, password,  user_role) VALUES (?,?,?)",
-      [email, hash, role],
-      (err, result) => {
-        console.log(err);
-      }
-    );
-  });
+  );
 });
 
 app.listen(5000, () => {
