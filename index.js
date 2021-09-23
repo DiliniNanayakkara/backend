@@ -59,7 +59,7 @@ app.use(
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
-  password: "PASSWORD",
+  password: "",
   database: "delart",
 });
 
@@ -611,7 +611,7 @@ app.get("/cart/:id", (req, res) => {
 app.get("/details/:id", (req, res) => {
   // console.log(req.params.id);
   db.query(
-    "SELECT * FROM customer WHERE email= '"+ req.params.id +"'",
+    "SELECT * FROM customer WHERE email= '" + req.params.id + "'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -770,11 +770,37 @@ app.post("/addtoorder", (req, res) => {
     const { email } = req.body;
     const { city } = req.body;
     const { date } = req.body;
-    
+
     db.query(
       "INSERT INTO tool_order (customer, order_total, firstname, lastname, address, phone, email, city, date) VALUES (?,?,?,?,?,?,?,?,?)",
+      [user, total, firstname, lastname, address, phone, email, city, date],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Added To Cart");
+        }
+      }
+    );
+  });
+
+  app.post("/setArtworkDelivery", (req, res) => {
+    const { artist } = req.body;
+    const { artwork } = req.body;
+    const { total } = req.body;
+    const { firstname } = req.body;
+    const { lastname } = req.body;
+    const { address } = req.body;
+    const { phone } = req.body;
+    const { email } = req.body;
+    const { city } = req.body;
+    const { date } = req.body;
+
+    db.query(
+      "INSERT INTO artwork_order (artist, artwork, order_total, firstname, lastname, address, phone, email, city, date) VALUES (?,?,?,?,?,?,?,?,?,?)",
       [
-        user,
+        artist,
+        artwork,
         total,
         firstname,
         lastname,
@@ -783,7 +809,6 @@ app.post("/addtoorder", (req, res) => {
         email,
         city,
         date,
-
       ],
       (err, result) => {
         if (err) {
@@ -793,44 +818,7 @@ app.post("/addtoorder", (req, res) => {
         }
       }
     );
-    });
-
-    app.post("/setArtworkDelivery", (req, res) => {
-      const { artist } = req.body;
-      const { artwork } = req.body;
-      const { total } = req.body;
-      const { firstname } = req.body;
-      const { lastname } = req.body;
-      const { address } = req.body;
-      const { phone } = req.body;
-      const { email } = req.body;
-      const { city } = req.body;
-      const { date } = req.body;
-      
-      db.query(
-        "INSERT INTO artwork_order (artist, artwork, order_total, firstname, lastname, address, phone, email, city, date) VALUES (?,?,?,?,?,?,?,?,?,?)",
-        [
-          artist,
-          artwork,
-          total,
-          firstname,
-          lastname,
-          address,
-          phone,
-          email,
-          city,
-          date,
-  
-        ],
-        (err, result) => {
-          if (err) {
-            console.log(err);
-          } else {
-            res.send("Added To Cart");
-          }
-        }
-      );
-      });
+  });
 
   // db.query(
   //     `DELETE FROM cart WHERE user = '"${user}"' `,
@@ -863,7 +851,11 @@ app.post("/quantityupdate", (req, res) => {
   const { quantity } = req.body;
 
   db.query(
-    " UPDATE tools SET tool_quantity = (tool_quantity - '" + quantity +"' )  WHERE tool_name = '" + art + "'",
+    " UPDATE tools SET tool_quantity = (tool_quantity - '" +
+      quantity +
+      "' )  WHERE tool_name = '" +
+      art +
+      "'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -876,22 +868,19 @@ app.post("/quantityupdate", (req, res) => {
 
 app.post("/ordercomplete", (req, res) => {
   const { user } = req.body;
-  db.query(
-    "DELETE FROM cart WHERE user = '" + user + "' ",
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
-      }
+  db.query("DELETE FROM cart WHERE user = '" + user + "' ", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
     }
-  );
+  });
 });
 
 app.post("/completeOrder", (req, res) => {
   const order_id = req.body.order_id;
   db.query(
-    "DELETE FROM artwork_order WHERE order_id = '"+ order_id + "' ",
+    "DELETE FROM artwork_order WHERE order_id = '" + order_id + "' ",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -900,9 +889,6 @@ app.post("/completeOrder", (req, res) => {
       }
     }
   );
-
-
-  
 });
 /*******************************A R T I S T  P R O F I L E ********************************************************************** */
 app.get("/Artistdis", (req, res) => {
@@ -976,9 +962,8 @@ app.get("/getOrders/:id", (req, res) => {
 });
 
 app.get("/getCompletedOrders/:id", (req, res) => {
-    
   db.query(
-    "SELECT * FROM artwork_order WHERE artist = '"+ req.params.id +"'",
+    "SELECT * FROM artwork_order WHERE artist = '" + req.params.id + "'",
     (err, result) => {
       if (err) {
         console.log(err);
@@ -2152,6 +2137,15 @@ app.post("/adUpload", uploadNew.single("image"), (req, res, err) => {
       }
     );
   }
+});
+
+//-----------------Artists List------------------//
+
+app.get("/artists", (req, res) => {
+  const sqlSelect = "SELECT * FROM artist";
+  db.query(sqlSelect, (err, result) => {
+    res.send(result);
+  });
 });
 
 app.listen(5000, () => {
