@@ -904,9 +904,28 @@ app.get("/Artistdis", (req, res) => {
   );
 });
 /******************************************************************************************************************ARTIST PROFILE */
-app.get("/pencilearts", (req, res) => {
+app.post("/addrow", (req, res) => {
+  const artist_id = req.body.artist_id;
+  const email = req.body.email;
+  const size = req.body.size;
+  const price = req.body.price;
+
   db.query(
-    "SELECT first_name, last_name, email, contact_no, gig FROM artistgig WHERE email ='artist@gmail.com'",
+    "INSERT INTO custtable (artist_id, email, size, price ) VALUES (?,?,?,?)",
+    [artist_id, email, size, price],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("Values Inserted");
+      }
+    }
+  );
+});
+
+app.get("/pencileartsz/:email", (req, res) => {
+  db.query(
+    `SELECT artist_id, email FROM artist WHERE email = "${req.params.email}"`,
     (err, result) => {
       if (err) {
         console.log(err);
@@ -916,10 +935,23 @@ app.get("/pencilearts", (req, res) => {
     }
   );
 });
+app.get("/pencilearts/:email", (req, res) => {
+  db.query(
+    `SELECT artist_id, email, description, contact_no, first_name, last_name FROM artist WHERE email = "${req.params.email}"`,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
 /*******************************A R T I S T  P R O F I L E ********************************************************************** */
-app.get("/Artistprofile", (req, res) => {
+app.get("/Artistprofile/:email", (req, res) => {
   db.query(
-    "SELECT artist_Id, email, first_name, last_name, contact_no, location FROM artist WHERE email ='artist@gmail.com'",
+    `SELECT artist_id, email, first_name, last_name, contact_no, description, location FROM artist WHERE email = "${req.params.email}"`,
     (err, result) => {
       if (err) {
         console.log(err);
@@ -929,6 +961,19 @@ app.get("/Artistprofile", (req, res) => {
     }
   );
 });
+app.get("/getsize/:email", (req, res) => {
+  db.query(
+    `SELECT email, size, price FROM custtable WHERE email = "${req.params.email}"`,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
 /******************************************************************************************************************ARTIST PROFILE */
 // app.post("/getOrders", (req, res) => {
 //   const username = req.body.username;
@@ -1118,7 +1163,91 @@ app.get("/Allartist", (req, res) => {
     }
   );
 });
+app.get("/staff", (req, res) => {
+  db.query(
+    "SELECT email, first_name, last_name, contact_no, user_role, nic FROM staff",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
 
+app.get("/orderlist", (req, res) => {
+  db.query("SELECT count(*) count FROM orders", (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.get("/Artistlists", (req, res) => {
+  db.query(
+    "SELECT artist_id, email, first_name, last_name, contact_no, description, location FROM artist",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.get("/getsizeArt/:Id", (req, res) => {
+  db.query(
+    `SELECT artist_id, email, size, price FROM custtable WHERE artist_id =${req.params.Id}`,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.get("/Cuspencilearts/:Id", (req, res) => {
+  db.query(
+    `SELECT artist_id, email, first_name, last_name, contact_no, description FROM artist WHERE artist_id =${req.params.Id}`,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+app.get("/Artistlistby/:Id", (req, res) => {
+  db.query(
+    `SELECT artist_id, email, first_name, last_name, contact_no, description FROM artist WHERE artist_id =${req.params.Id}`,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+app.get("/Artistlista", (req, res) => {
+  db.query(
+    "SELECT artist_id, email, first_name, last_name, contact_no, description FROM artist",
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
 app.get("/ArtistList", (req, res) => {
   db.query("SELECT count(*) count FROM user", (err, result) => {
     if (err) {
